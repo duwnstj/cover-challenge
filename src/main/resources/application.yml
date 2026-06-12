@@ -1,0 +1,6 @@
+server:
+  port: 8080  # 내장 Tomcat 포트 (나중에 Docker -p 옵션이랑 맞춰야 함)
+
+spring:
+  application:
+    name: cover-challenge  # 서비스 이름 (로그, 모니터링에서 식별용)

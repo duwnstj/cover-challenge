@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5'   // Spring Boot 3.x 최신 안정 버전
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.coverchallenge'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)  // Java 17 고정
+    }
+}
+
+// Lombok 어노테이션 프로세서 설정
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'  // Spring MVC, 내장 Tomcat 포함
+    compileOnly 'org.projectlombok:lombok'                             // @Getter, @Builder 등 코드 자동 생성
+    annotationProcessor 'org.projectlombok:lombok'                     // 컴파일 시 Lombok 처리
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

@@ -1,0 +1,15 @@
+# Gradle 빌드 관련 찌꺼기 폴더 (★가장 중요: 용량 엄청 차지함)
+.gradle/
+build/
+
+# 개발 툴(IntelliJ, VS Code) 설정 파일 (개인 컴퓨터 설정이라 Git에 올리면 꼬임)
+.idea/
+*.iml
+.vscode/
+
+# OS 가 생성하는 임시 파일
+.DS_Store
+Thumbs.db
+
+# 로그 파일
+*.log
