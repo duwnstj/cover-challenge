@@ -6,6 +6,7 @@ build/
 .idea/
 *.iml
 .vscode/
+.env
 
 # OS 가 생성하는 임시 파일
 .DS_Store

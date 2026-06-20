@@ -29,6 +29,8 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'                             // @Getter, @Builder 등 코드 자동 생성
     annotationProcessor 'org.projectlombok:lombok'                     // 컴파일 시 Lombok 처리
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'  // JPA (DB 연결 추상화 레이어)
+    runtimeOnly 'com.mysql:mysql-connector-j'   // MySQL 드라이버 (실제 DB 연결에 필요)
 }
 
 tasks.named('test') {

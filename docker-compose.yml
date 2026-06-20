@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: cover-mysql
+    # 🟢 1. 보안 최적화: 외부 환경 변수(Environment) 주입 구조로 변경 (하드코딩 배제)
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: cover_db
+    # 🟢 2. 데이터 영속성: 도커가 관리하는 안전한 볼륨 레이어 생성
+    volumes:
+      - mysql_storage:/var/lib/mysql
+    # 🟢 3. 헬스체크 도입: MySQL 엔진이 진짜 부팅 완료되어 응답할 때까지 대기 상태 정의
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${DB_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: cover-app
+    ports:
+      - "8080:8080"
+    # 🟢 4. 철저한 구동 순서 보장: db가 'health_healthy'(진짜 손님 받을 상태)가 될 때까지 기동 대기
+    depends_on:
+      db:
+        condition: service_healthy
+    # 🟢 5. 컨테이너 내부 환경 변수 토싱
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/cover_db?serverTimezone=Asia/Seoul
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
+# 도커 엔진이 관리할 영구 저장소 볼륨 명시
+volumes:
+  mysql_storage:
