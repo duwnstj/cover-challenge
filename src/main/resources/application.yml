@@ -1,16 +1,4 @@
-server:
-  port: 8080
 spring:
-  datasource:
-    # 🟢 도커 컴포즈가 주입해 주는 환경 변수가 있으면 그걸 쓰고, 없으면 로컬 fallback(localhost) 적용
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/cover_db?serverTimezone=Asia/Seoul}
-    username: root
-    password: ${SPRING_DATASOURCE_PASSWORD:default_pass}
-    driver-class-name: com.mysql.cj.jdbc.Driver # 추가
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true # SQL 줄바꿈 이쁘게 출력
+  application:
+    name: cover-challenge
+  # 프로파일별 설정은 application-{profile}.yml에서 오버라이드

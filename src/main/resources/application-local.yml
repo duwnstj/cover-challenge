@@ -1,0 +1,18 @@
+# 로컬 개발 환경 전용 — .env의 SPRING_PROFILES_ACTIVE=local 일 때 활성화
+
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}           # .env에서 주입
+    username: ${SPRING_DATASOURCE_USERNAME} # .env에서 주입
+    password: ${SPRING_DATASOURCE_PASSWORD} # .env에서 주입
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update    # 로컬에서는 엔티티 변경 시 테이블 자동 수정 허용
+    show-sql: true        # 로컬에서는 실행 SQL 콘솔 출력 (디버깅용)
+    properties:
+      hibernate:
+        format_sql: true  # SQL 줄바꿈해서 읽기 쉽게 출력

@@ -1,0 +1,18 @@
+# AWS 운영 환경 전용 — .env의 SPRING_PROFILES_ACTIVE=prod 일 때 활성화
+
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}           # 기본값 없음 — .env에 없으면 앱 시작 거부
+    username: ${SPRING_DATASOURCE_USERNAME} # .env에서 주입
+    password: ${SPRING_DATASOURCE_PASSWORD} # .env에서 주입
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 5        # RDS 프리티어 동시 연결 수 제한 고려
+      connection-timeout: 30000   # 30초 안에 DB 연결 못하면 에러 — 무한 대기 방지
+  jpa:
+    hibernate:
+      ddl-auto: validate  # 운영 핵심 — 테이블 건드리지 않고 엔티티와 스키마 일치 여부만 검증
+    show-sql: false       # 운영에서 SQL 로그 끔 (보안 + 성능)

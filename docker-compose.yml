@@ -1,19 +1,26 @@
-version: '3.8'
+# [안내] 2026년 최신 도커 스펙에서는 최상단 'version' 속성이 공식 생략(obsolete)되므로 경고를 없애기 위해 과감히 제거했습니다.
 
 services:
   db:
     image: mysql:8.0
     container_name: cover-mysql
-    # 🟢 1. 보안 최적화: 외부 환경 변수(Environment) 주입 구조로 변경 (하드코딩 배제)
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${SPRING_DATASOURCE_PASSWORD} # .env에 숨겨둔 로컬 패스워드를 주입받음
       MYSQL_DATABASE: cover_db
-    # 🟢 2. 데이터 영속성: 도커가 관리하는 안전한 볼륨 레이어 생성
-    volumes:
-      - mysql_storage:/var/lib/mysql
-    # 🟢 3. 헬스체크 도입: MySQL 엔진이 진짜 부팅 완료되어 응답할 때까지 대기 상태 정의
+    networks:
+      - internal # [중요] 격리된 내부 가상망에 합류시킴
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${DB_PASSWORD}"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p$${SPRING_DATASOURCE_PASSWORD}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -21,17 +28,47 @@ services:
   app:
     build: .
     container_name: cover-app
-    ports:
-      - "8080:8080"
-    # 🟢 4. 철저한 구동 순서 보장: db가 'health_healthy'(진짜 손님 받을 상태)가 될 때까지 기동 대기
+    env_file:
+      - .env # 로컬용 .env 파일을 통째로 로드
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      # [🔥 에러 해결 포인트] .env의 localhost 주소를 무시하고, 도커 내부망 통신을 위해 호스트 주소를 'db' 서비스명으로 강제 맵핑!
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/cover_db?serverTimezone=Asia/Seoul
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    networks:
+      - internal # [중요] db, nginx 컨테이너와 동일한 내부 네트워크망에 묶어줌
     depends_on:
       db:
-        condition: service_healthy
-    # 🟢 5. 컨테이너 내부 환경 변수 토싱
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/cover_db?serverTimezone=Asia/Seoul
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+        condition: service_healthy # DB 컨테이너가 헬스체크 Pass(Healthy) 판정을 받을 때까지 앱 가동을 대기시킴
+    healthcheck:
+      # [최적화] Alpine 경량 리눅스에 무조건 내장되어 있는 wget 명령어로 스프링 부트 톰캣 서버 무결성 체크
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8080/api/health",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-# 도커 엔진이 관리할 영구 저장소 볼륨 명시
-volumes:
-  mysql_storage:
+  nginx:
+    image: nginx:alpine
+    container_name: cover-nginx
+    ports:
+      - "80:80" # 외부 사용자는 오직 표준 웹 포트(80)로만 접근 가능. 앱의 8080 포트는 외부에서 절대 안 보임
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro # 호스트의 Nginx 프록시 설정 파일을 컨테이너 내부로 읽기 전용(:ro) 마운트
+    depends_on:
+      app:
+        condition: service_healthy # 스프링 부트 서버가 완전히 구동되어 healthy해지기 전까지 Nginx 시동 대기
+    networks:
+      - internal # 내부망을 통해 요청을 app 컨테이너로 안전하게 토스함
+
+networks:
+  internal:
+    driver: bridge # 도커 컴포즈 내부에서 컨테이너 간 가상 독립 IP를 부여하고 통신 제어권을 갖는 브릿지 드라이버 선언
