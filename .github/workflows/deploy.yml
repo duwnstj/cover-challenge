@@ -1,0 +1,36 @@
+name: Production Deploy
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # 1. 준서님이 말씀하신 "진짜 배포용 이름표" (예: v1.0.0)
+    paths-ignore:
+      - '**.md'   # 2. 자잘한 문서 작업 격리 (비용 방어)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Execute Deploy Script on EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/cover-challenge
+            git pull origin main
+            chmod +x deploy.sh
+            ./deploy.sh
+
+      - name: Send Slack Notification
+        if: always()  # 앞선 단계(SSH 배포)가 성공하든 실패하든 무조건 실행
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_TITLE: "🚀 배포 파이프라인 알림"
+          SLACK_MESSAGE: "배포 스크립트 실행 상태를 확인하세요. (성공/실패 여부 자동 색상 지정)"
+          SLACK_COLOR: ${{ job.status }}  # success면 초록색, failure면 빨간색으로 슬랙에 전송됨
