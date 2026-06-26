@@ -7,12 +7,19 @@ FROM gradle:8.7.0-jdk17 AS builder
 WORKDIR /build
 
 # 호스트(Windows)의 파일들을 컨테이너 내부로 복사
+# [FinOps/데브옵스 최적화] 변경이 잦지 않은 설정 파일부터 복사하여 레이어 캐시(Cache) 확보
 COPY gradlew settings.gradle build.gradle ./
 COPY gradle ./gradle
+
+# 실행 파일 권한 부여 및 의존성 라이브러리만 먼저 다운로드
+# (src 코드가 바뀌어도 여기까지는 캐시가 살아있어 재다운로드 방지)
+RUN chmod +x ./gradlew
+RUN ./gradlew dependencies --no-daemon
+
+# [중요] 변경이 가장 잦은 소스 코드(src)는 캐싱이 끝난 가장 마지막 단계에 복사
 COPY src ./src
 
-# 실행 파일 권한 부여 및 실제 빌드 진행 (테스트는 무시해서 속도 향상)
-RUN chmod +x ./gradlew
+# 실제 빌드 진행 (이미 캐시된 의존성을 쓰기 때문에 코드가 바뀌어도 빌드가 순식간에 끝남)
 RUN ./gradlew bootJar --no-daemon
 
 # ==========================================

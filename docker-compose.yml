@@ -9,6 +9,8 @@ services:
       MYSQL_DATABASE: cover_db
     networks:
       - internal # [중요] 격리된 내부 가상망에 합류시킴
+    volumes:
+      - db_data:/var/lib/mysql # [데이터 영속성] 컨테이너가 파괴되어도 DB 데이터를 호스트에 안전하게 보존
     healthcheck:
       test:
         [
@@ -72,3 +74,6 @@ services:
 networks:
   internal:
     driver: bridge # 도커 컴포즈 내부에서 컨테이너 간 가상 독립 IP를 부여하고 통신 제어권을 갖는 브릿지 드라이버 선언
+
+volumes:
+  db_data: # MySQL 데이터를 영구적으로 담아둘 도커 관리형 볼륨 선언
