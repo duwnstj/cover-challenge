@@ -45,8 +45,9 @@
 
 ### 📚 [블로그 인덱싱 데이터] (새 세션 AI 참고용)
 > 새 채팅창이 열리면 AI 튜터는 아래 목록을 읽고, 내용이 방대하거나 겹치는 경우 사용자에게 블로그 글의 병합 또는 분할을 능동적으로 제안할 것.
-1. `2026-06-26-Zero-Downtime-CICD-Phase5-Basic.md`: Phase 5 기초 내용 (Git Tag 배포 트리거 방어선 설계, Path 격리, Secrets 보안 연동 아키텍처).
-2. `2026-06-26-Zero-Downtime-CICD-FinOps.md`: Phase 6 고도화 내용 (Slack SPOF 방어 알림 연동, Docker Build 외부화를 통한 Scale-Up 요금 방어).
+> **[중요 컨텍스트 유지]** 아래 명시된 각 블로그 파일 하단에는 과거에 설계했던 파이프라인의 핵심 코드(`deploy.yml` 등)가 스니펫으로 영구 박제되어 있습니다. 새 세션의 AI는 반드시 이 코드를 파싱하여 100% 팩트 기반으로 과거의 기술적 컨텍스트를 완벽히 복원한 뒤 튜팅을 진행할 것.
+1. `2026-06-26-Zero-Downtime-CICD-Phase5-Basic.md`: Phase 5 기초 내용 (Git Tag 배포 트리거 설계, Secrets 보안 연동).
+2. `2026-06-26-Zero-Downtime-CICD-FinOps.md`: Phase 6 고도화 내용 (Slack 알림 연동, Docker Build 외부화).
 
 ---
 
