@@ -17,9 +17,12 @@ fi
 
 echo "=> 배포 타겟 환경: $TARGET_COLOR (포트: $TARGET_PORT)"
 
-# 2. 신버전(Target) 컨테이너 띄우기
+# 2. 신버전(Target) 이미지 내려받기 및 컨테이너 띄우기
+echo "=> Docker Hub에서 최신 이미지를 Pull 받습니다..."
+docker pull ${DOCKERHUB_USERNAME}/cover-challenge:latest
+
 echo "=> 신버전 컨테이너를 구동합니다..."
-# docker-compose up -d ${TARGET_COLOR}
+# 실제로는 prod 파일을 명시하여 구동: docker-compose -f docker-compose.prod.yml up -d --no-build ${TARGET_COLOR}
 
 # 3. [안전장치: 파이프라인 방지] Health Check (통합테스트가 아님!)
 echo "=> Health Check 대기 중..."

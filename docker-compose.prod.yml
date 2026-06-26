@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   app:
-    build: .
+    image: ${DOCKERHUB_USERNAME}/cover-challenge:latest
     container_name: cover-app
     env_file:
       - .env
